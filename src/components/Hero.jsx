@@ -7,13 +7,14 @@ export default function Hero() {
       {/* Spline scene as full-bleed background */}
       <div className="absolute inset-0">
         <Spline
-          scene="https://prod.spline.design/NoYj4XN8s0IlixJM/scene.splinecode"
+          scene="https://prod.spline.design/kg9idNYfDKoDwibE/scene.splinecode"
           style={{ width: "100%", height: "100%" }}
         />
       </div>
 
-      {/* Glassy gradient veil to ensure text contrast without blocking interaction */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.35)_55%,rgba(0,0,0,0.7)_100%)]" />
+      {/* Contrast and color veil overlays (non-blocking) */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.35)_55%,rgba(0,0,0,0.75)_100%)]" />
+      <div className="absolute inset-0 pointer-events-none mix-blend-screen opacity-50 bg-[radial-gradient(60%_60%_at_30%_30%,rgba(168,85,247,0.25),transparent_60%),radial-gradient(50%_50%_at_70%_70%,rgba(251,146,60,0.25),transparent_60%)]" />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 pt-28 pb-20 grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
         <motion.div
@@ -27,7 +28,7 @@ export default function Hero() {
             Available for freelance projects
           </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Futuristic interfaces with precision and motion.
+            Immersive, abstract 3D experiences for modern web.
           </h1>
           <p className="text-white/80 text-lg max-w-xl">
             I'm Anung Aninditha, a frontend developer specializing in Next.js, TypeScript, and Tailwind CSS. I craft fast, accessible interfaces with a focus on delightful motion.
