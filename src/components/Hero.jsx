@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
-function AbstractRainBackground() {
+function MeteorShowerBackground() {
   const canvasRef = useRef(null);
-  const animationRef = useRef(0);
+  const rafRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -18,55 +18,78 @@ function AbstractRainBackground() {
     canvas.height = height * DPR;
     ctx.scale(DPR, DPR);
 
-    const dropsCount = Math.floor(Math.min(220, Math.max(80, width / 8)));
-    const drops = Array.from({ length: dropsCount }).map(() => ({
-      x: Math.random() * width,
-      y: Math.random() * -height,
-      len: 10 + Math.random() * 24,
-      speed: 1.2 + Math.random() * 2.5,
-      width: 0.75 + Math.random() * 1.25,
-      hue: 210 + Math.random() * 40, // cool blue range
-      alpha: 0.15 + Math.random() * 0.2,
+    // 50 degrees slant
+    const angleDeg = 50;
+    const angle = (angleDeg * Math.PI) / 180;
+    const sinA = Math.sin(angle);
+    const cosA = Math.cos(angle);
+
+    const count = Math.floor(Math.min(160, Math.max(70, (width + height) / 12)));
+    const meteors = Array.from({ length: count }).map(() => ({
+      x: Math.random() * width - width * 0.2,
+      y: Math.random() * height - height,
+      len: 60 + Math.random() * 140, // longer like falling meteors
+      speed: 2.2 + Math.random() * 3.2,
+      width: 1 + Math.random() * 1.6,
+      hue: 200 + Math.random() * 30, // cool blue-ish
+      alpha: 0.18 + Math.random() * 0.22,
+      glow: 0.3 + Math.random() * 0.5,
     }));
 
-    let lastTime = performance.now();
-    function animate(now) {
-      const dt = Math.min(32, now - lastTime);
-      lastTime = now;
+    let last = performance.now();
+    function tick(now) {
+      const dt = Math.min(32, now - last);
+      last = now;
 
-      // subtle motion blur background
+      // Motion blur background clear
       ctx.fillStyle = "rgba(0,0,0,0.28)";
       ctx.fillRect(0, 0, width, height);
 
-      for (let d of drops) {
-        // draw
-        const grad = ctx.createLinearGradient(d.x, d.y, d.x, d.y + d.len);
-        grad.addColorStop(0, `hsla(${d.hue}, 90%, 70%, ${d.alpha})`);
-        grad.addColorStop(1, `hsla(${d.hue}, 90%, 55%, 0)`);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = d.width;
-        ctx.beginPath();
-        ctx.moveTo(d.x, d.y);
-        ctx.lineTo(d.x, d.y + d.len);
-        ctx.stroke();
+      for (let m of meteors) {
+        const tailX = m.x - m.len * sinA;
+        const tailY = m.y - m.len * cosA;
 
-        // update
-        d.y += d.speed * (dt / 16);
-        if (d.y > height + d.len) {
-          d.x = Math.random() * width;
-          d.y = -Math.random() * height * 0.3;
-          d.len = 10 + Math.random() * 24;
-          d.speed = 1.2 + Math.random() * 2.5;
-          d.width = 0.75 + Math.random() * 1.25;
-          d.hue = 210 + Math.random() * 40;
-          d.alpha = 0.15 + Math.random() * 0.2;
+        // soft glow
+        const grad = ctx.createLinearGradient(m.x, m.y, tailX, tailY);
+        grad.addColorStop(0, `hsla(${m.hue}, 90%, 85%, ${Math.min(1, m.alpha + 0.12)})`);
+        grad.addColorStop(0.25, `hsla(${m.hue}, 90%, 70%, ${m.alpha})`);
+        grad.addColorStop(1, `hsla(${m.hue}, 90%, 60%, 0)`);
+
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = m.width;
+        ctx.lineCap = "round";
+
+        // outer glow using shadow
+        ctx.save();
+        ctx.shadowColor = `hsla(${m.hue}, 100%, 75%, ${m.glow})`;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+        ctx.restore();
+
+        // update position along 50deg
+        m.x += m.speed * sinA * (dt / 16);
+        m.y += m.speed * cosA * (dt / 16);
+
+        // recycle when off-screen (consider diagonal overshoot)
+        if (m.x > width + 100 || m.y > height + 100) {
+          m.x = -100 + Math.random() * (width * 0.5);
+          m.y = -Math.random() * height * 0.6 - 60;
+          m.len = 60 + Math.random() * 140;
+          m.speed = 2.2 + Math.random() * 3.2;
+          m.width = 1 + Math.random() * 1.6;
+          m.hue = 200 + Math.random() * 30;
+          m.alpha = 0.18 + Math.random() * 0.22;
+          m.glow = 0.3 + Math.random() * 0.5;
         }
       }
 
-      animationRef.current = requestAnimationFrame(animate);
+      rafRef.current = requestAnimationFrame(tick);
     }
 
-    animationRef.current = requestAnimationFrame(animate);
+    rafRef.current = requestAnimationFrame(tick);
 
     function handleResize() {
       width = canvas.offsetWidth;
@@ -81,7 +104,7 @@ function AbstractRainBackground() {
     ro.observe(canvas);
 
     return () => {
-      cancelAnimationFrame(animationRef.current);
+      cancelAnimationFrame(rafRef.current);
       ro.disconnect();
     };
   }, []);
@@ -98,14 +121,14 @@ function AbstractRainBackground() {
 export default function Hero() {
   return (
     <section id="home" className="relative min-h-[90vh] w-full overflow-hidden bg-black">
-      {/* Calmer abstract rain background (replaces dizzying 3D tunnel) */}
+      {/* Calmer abstract meteor rain at 50° */}
       <div className="absolute inset-0">
-        <AbstractRainBackground />
+        <MeteorShowerBackground />
       </div>
 
-      {/* Soft vignettes and color wash (non-blocking) */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.35)_55%,rgba(0,0,0,0.75)_100%)]" />
-      <div className="absolute inset-0 pointer-events-none mix-blend-screen opacity-40 bg-[radial-gradient(60%_60%_at_30%_30%,rgba(56,189,248,0.18),transparent_60%),radial-gradient(50%_50%_at_70%_70%,rgba(147,197,253,0.18),transparent_60%)]" />
+      {/* Vignette and gentle cool tint (non-blocking) */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0.35)_55%,rgba(0,0,0,0.8)_100%)]" />
+      <div className="absolute inset-0 pointer-events-none mix-blend-screen opacity-35 bg-[radial-gradient(60%_60%_at_30%_30%,rgba(56,189,248,0.16),transparent_60%),radial-gradient(50%_50%_at_70%_70%,rgba(147,197,253,0.16),transparent_60%)]" />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 pt-28 pb-20 grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
         <motion.div
@@ -119,10 +142,10 @@ export default function Hero() {
             Available for freelance projects
           </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Calm, abstract rain for a focused portfolio.
+            Meteor rain at 50° for a dynamic yet calm vibe.
           </h1>
           <p className="text-white/80 text-lg max-w-xl">
-            I design clean, performant interfaces with subtle motion and a soothing backdrop. No dizziness—just clarity and craft.
+            Subtle, elongated streaks glide diagonally—evoking falling meteors without overwhelming motion.
           </p>
           <div className="flex flex-wrap gap-3">
             <a
