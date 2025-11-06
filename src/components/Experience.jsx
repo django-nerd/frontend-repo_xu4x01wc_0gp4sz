@@ -72,11 +72,12 @@ const experiences = [
 
 export default function Experience() {
   return (
-    <section id="experience" className="relative py-20 bg-white">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <section id="experience" className="relative py-20 bg-black">
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-black/30 to-black/80" />
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 relative">
         <div className="mb-10">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">Experience</h2>
-          <p className="text-slate-600 mt-2">A timeline of my roles and contributions.</p>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Experience</h2>
+          <p className="text-white/70 mt-2">A timeline of my roles and contributions.</p>
         </div>
 
         <div className="relative space-y-6">
@@ -87,21 +88,21 @@ export default function Experience() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.4, delay: idx * 0.03 }}
-              className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur p-6 shadow-sm"
+              className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-semibold text-slate-900">{exp.role}</h3>
-                  <p className="text-slate-700">{exp.company}</p>
+                  <h3 className="text-xl font-semibold text-white">{exp.role}</h3>
+                  <p className="text-white/80">{exp.company}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-slate-600">{exp.period}</p>
+                  <p className="text-sm text-white/70">{exp.period}</p>
                   {exp.location && (
-                    <p className="text-sm text-slate-600">{exp.location}</p>
+                    <p className="text-sm text-white/70">{exp.location}</p>
                   )}
                 </div>
               </div>
-              <ul className="mt-4 grid gap-2 text-slate-700 list-disc list-inside">
+              <ul className="mt-4 grid gap-2 text-white/80 list-disc list-inside">
                 {exp.bullets.map((b, i) => (
                   <li key={i}>{b}</li>
                 ))}
